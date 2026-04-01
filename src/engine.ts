@@ -93,6 +93,7 @@ export function runDetectors(
   const errors: ScanError[] = [];
   const perDetector: Record<string, number> = {};
   const startTime = performance.now();
+  let filesProcessed = 0;
 
   // Register Python if any Python files are in the scan set
   const hasPython = files.some((f) => f.language === "python");
@@ -101,6 +102,7 @@ export function runDetectors(
   }
 
   for (const file of files) {
+    filesProcessed++;
     let source: string;
     try {
       source = readFileSync(file.absolutePath, "utf-8");
@@ -207,7 +209,7 @@ export function runDetectors(
         const totalMs = performance.now() - startTime;
         return {
           findings: findings.slice(0, options.maxFindings),
-          filesScanned: files.length,
+          filesScanned: filesProcessed,
           errors,
           timing: options.verbose
             ? { totalMs, perDetector }
@@ -224,7 +226,7 @@ export function runDetectors(
 
   return {
     findings,
-    filesScanned: files.length,
+    filesScanned: filesProcessed,
     errors,
     timing,
   };

@@ -64,6 +64,35 @@ describe("loadProjectInfo", () => {
       true,
     );
   });
+});
+
+describe("parsePyprojectToml", () => {
+  test("parses dependencies from pyproject.toml", () => {
+    const info = loadProjectInfo(FIXTURES_DIR);
+
+    // pyproject.toml declares requests, flask, numpy
+    expect(info.dependencies.has("requests")).toBe(true);
+    expect(info.dependencies.has("flask")).toBe(true);
+    expect(info.dependencies.has("numpy")).toBe(true);
+  });
+
+  test("strips version specifiers from pyproject.toml dependencies", () => {
+    const info = loadProjectInfo(FIXTURES_DIR);
+
+    // "requests>=2.28" should be stored as "requests" (no version suffix)
+    expect(info.dependencies.has("requests")).toBe(true);
+    expect(info.dependencies.has("requests>=2.28")).toBe(false);
+
+    // "flask>=3.0" should be stored as "flask"
+    expect(info.dependencies.has("flask")).toBe(true);
+    expect(info.dependencies.has("flask>=3.0")).toBe(false);
+  });
+
+  test("records pyproject.toml in manifests", () => {
+    const info = loadProjectInfo(FIXTURES_DIR);
+
+    expect(info.manifests.some((m) => m.endsWith("pyproject.toml"))).toBe(true);
+  });
 
   test("returns empty ProjectInfo when no manifest found", () => {
     // Use a path that definitely has no manifests
