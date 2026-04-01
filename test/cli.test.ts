@@ -112,7 +112,7 @@ describe("CLI E2E", () => {
       "scan",
       DIRTY_FIXTURES,
       "--format",
-      "sarif",
+      "html",
       "--no-config",
     ]);
 

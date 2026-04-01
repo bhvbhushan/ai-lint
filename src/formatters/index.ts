@@ -1,8 +1,12 @@
 import type { ScanResult } from "../types.js";
+import { formatGithub } from "./github.js";
 import { formatJson } from "./json.js";
+import { formatSarif } from "./sarif.js";
 import { formatText } from "./text.js";
 
+export { formatGithub } from "./github.js";
 export { formatJson } from "./json.js";
+export { formatSarif } from "./sarif.js";
 export { formatText } from "./text.js";
 
 /** Supported format names */
@@ -21,10 +25,12 @@ export function getFormatter(
     case "json":
       return formatJson;
     case "github":
+      return formatGithub;
     case "sarif":
+      return formatSarif;
     case "html":
       throw new Error(
-        `Format '${format}' is not yet implemented. Available formats: text, json`,
+        `Format '${format}' is not yet implemented. Available formats: text, json, github, sarif`,
       );
     default:
       throw new Error(
