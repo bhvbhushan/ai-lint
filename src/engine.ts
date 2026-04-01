@@ -58,6 +58,41 @@ export function ensurePythonRegistered(): void {
 const DETECTOR_TIMEOUT_MS = 5_000;
 
 /**
+ * Compile a glob pattern into a RegExp that can be tested efficiently.
+ * Escapes regex-special characters and converts glob wildcards to regex syntax.
+ */
+function compileGlob(pattern: string): RegExp {
+  // Mark ** and * before escaping other characters
+  // Use unique placeholders that won't contain special regex characters
+  let result = pattern
+    .replace(/\*\*/g, "\x00GLOBSTAR\x00")  // Temporarily mark **
+    .replace(/\*/g, "\x00STAR\x00")         // Temporarily mark *
+
+  // Now escape all regex-special characters
+  result = result
+    .replace(/\\/g, "\\\\") // Backslash
+    .replace(/\./g, "\\.")   // Dot
+    .replace(/\?/g, "\\?")   // Question mark
+    .replace(/\+/g, "\\+")   // Plus
+    .replace(/\(/g, "\\(")   // Left paren
+    .replace(/\)/g, "\\)")   // Right paren
+    .replace(/\[/g, "\\[")   // Left bracket
+    .replace(/\]/g, "\\]")   // Right bracket
+    .replace(/\{/g, "\\{")   // Left brace
+    .replace(/\}/g, "\\}")   // Right brace
+    .replace(/\^/g, "\\^")   // Caret
+    .replace(/\$/g, "\\$")   // Dollar
+    .replace(/\|/g, "\\|");  // Pipe
+
+  // Now replace marked wildcards with their regex equivalents
+  const regexStr = result
+    .replace(/\x00GLOBSTAR\x00/g, ".*")        // ** matches anything including /
+    .replace(/\x00STAR\x00/g, "[^/]*");        // * matches anything except /
+
+  return new RegExp(`^${regexStr}$`);
+}
+
+/**
  * Discover all supported files under `scanRoot`, respecting ignore patterns.
  */
 export function discoverFiles(
@@ -71,7 +106,10 @@ export function discoverFiles(
   const gitignorePatterns = loadGitignore(root);
   const allIgnorePatterns = [...config.ignore, ...gitignorePatterns];
 
-  walkDirectory(root, root, allIgnorePatterns, files);
+  // Pre-compile all ignore patterns into RegExp objects
+  const compiledIgnorePatterns = allIgnorePatterns.map(compileGlob);
+
+  walkDirectory(root, root, compiledIgnorePatterns, files);
 
   return files;
 }
@@ -272,7 +310,7 @@ function runWithTimeout(
 function walkDirectory(
   dir: string,
   scanRoot: string,
-  ignorePatterns: string[],
+  compiledIgnorePatterns: RegExp[],
   files: FileInfo[],
 ): void {
   let entries;
@@ -297,14 +335,14 @@ function walkDirectory(
     const relativePath = relative(scanRoot, fullPath);
 
     // Check ignore patterns
-    if (matchesIgnorePattern(relativePath, entry.name, ignorePatterns)) {
+    if (matchesIgnorePattern(relativePath, entry.name, compiledIgnorePatterns)) {
       continue;
     }
 
     if (entry.isDirectory()) {
       // Skip hidden directories
       if (entry.name.startsWith(".")) continue;
-      walkDirectory(fullPath, scanRoot, ignorePatterns, files);
+      walkDirectory(fullPath, scanRoot, compiledIgnorePatterns, files);
     } else if (entry.isFile() || entry.isSymbolicLink()) {
       // Check if symlink points to a valid file
       if (entry.isSymbolicLink()) {
@@ -345,30 +383,15 @@ function walkDirectory(
 function matchesIgnorePattern(
   relativePath: string,
   baseName: string,
-  patterns: string[],
+  compiledPatterns: RegExp[],
 ): boolean {
-  for (const pattern of patterns) {
-    if (matchGlob(relativePath, pattern)) return true;
-    if (matchGlob(baseName, pattern)) return true;
+  for (const regex of compiledPatterns) {
+    if (regex.test(relativePath)) return true;
+    if (regex.test(baseName)) return true;
   }
   return false;
 }
 
-/**
- * Simple glob matcher for ignore patterns.
- * Supports: ** (any path), * (any segment), and literal matches.
- */
-function matchGlob(path: string, pattern: string): boolean {
-  // Convert glob pattern to regex
-  const regexStr = pattern
-    .replace(/\./g, "\\.")
-    .replace(/\*\*/g, "{{GLOBSTAR}}")
-    .replace(/\*/g, "[^/]*")
-    .replace(/\{\{GLOBSTAR\}\}/g, ".*");
-
-  const regex = new RegExp(`^${regexStr}$`);
-  return regex.test(path);
-}
 
 /**
  * Load .gitignore patterns from the project root.
