@@ -1,7 +1,7 @@
 {
   "name": "aiqt",
   "version": "0.1.0",
-  "description": "AI code quality linter built on ast-grep",
+  "description": "AI code quality toolkit — deterministic linter for the AI coding era",
   "type": "module",
   "bin": {
     "aiqt": "./dist/cli.js"
@@ -17,6 +17,18 @@
     "README.md",
     "LICENSE"
   ],
+  "keywords": [
+    "linter",
+    "ai",
+    "code-quality",
+    "ast",
+    "static-analysis"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bhvbhushan/aiqt"
+  },
   "engines": {
     "node": ">=20"
   },

@@ -112,11 +112,26 @@ describe("CLI E2E", () => {
       "scan",
       DIRTY_FIXTURES,
       "--format",
+      "csv",
+      "--no-config",
+    ]);
+
+    expect(stderr).toContain("Unknown format");
+    expect(exitCode).toBe(2);
+  });
+
+  test("html format produces HTML output", async () => {
+    const { stdout, exitCode } = await runCli([
+      "scan",
+      DIRTY_FIXTURES,
+      "--format",
       "html",
       "--no-config",
     ]);
 
-    expect(stderr).toContain("not yet implemented");
-    expect(exitCode).toBe(2);
+    expect(stdout).toContain("<!DOCTYPE html>");
+    expect(stdout).toContain("aiqt Report");
+    // Dirty fixtures should produce findings
+    expect(exitCode).toBe(1);
   });
 });
