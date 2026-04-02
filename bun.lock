@@ -4,8 +4,6 @@
     "": {
       "name": "aiqt",
       "dependencies": {
-        "@actions/core": "^3.0.0",
-        "@actions/github": "^9.0.0",
         "@ast-grep/lang-python": "^0.0.6",
         "@ast-grep/napi": "^0.42.0",
         "commander": "^13.1.0",
@@ -13,6 +11,8 @@
         "zod": "^3.24.4",
       },
       "devDependencies": {
+        "@actions/core": "^3.0.0",
+        "@actions/github": "^9.0.0",
         "@types/node": "^22.14.0",
         "@types/sarif": "^2.1.7",
         "@vercel/ncc": "^0.38.4",
