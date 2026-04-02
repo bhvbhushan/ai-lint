@@ -9,7 +9,7 @@ import { builtinDetectors } from "./detectors/index.js";
 import { EXTENSION_MAP, discoverFiles, pathsToFileInfos, runDetectors } from "./engine.js";
 import { getFormatter } from "./formatters/index.js";
 import { loadProjectInfo } from "./project.js";
-import type { AiqtConfig, FileInfo } from "./types.js";
+import type { AiLintConfig, FileInfo } from "./types.js";
 
 /** Read version from package.json */
 function getVersion(): string {
@@ -117,7 +117,7 @@ async function scanAction(
 
   // Load config
   // Commander's --no-config sets options.config to false
-  let config: AiqtConfig;
+  let config: AiLintConfig;
   if (options.config === false) {
     config = { ...DEFAULT_CONFIG };
   } else {
@@ -224,7 +224,7 @@ function main(): void {
   const program = new Command();
 
   program
-    .name("aiqt")
+    .name("ai-lint")
     .description("AI code quality linter built on ast-grep")
     .version(getVersion());
 

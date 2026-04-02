@@ -5,7 +5,7 @@ import { loadConfig, DEFAULT_CONFIG } from "../config.js";
 import { builtinDetectors } from "../detectors/index.js";
 import { pathsToFileInfos, runDetectors } from "../engine.js";
 import { loadProjectInfo } from "../project.js";
-import type { AiqtConfig } from "../types.js";
+import type { AiLintConfig } from "../types.js";
 import { parseDiff } from "./diff.js";
 import { filterFindings } from "./filter.js";
 import {
@@ -34,10 +34,10 @@ const VALID_SEVERITY = new Set<SeverityThreshold>([
 async function run(): Promise<void> {
   // 1. Read inputs
   const token = core.getInput("github-token", { required: true });
-  const configPath = core.getInput("config") || ".aiqt.yml";
+  const configPath = core.getInput("config") || ".ai-lint.yml";
   const onFailureInput = core.getInput("on-failure") || "comment-only";
   const severityInput = core.getInput("severity-threshold") || "warning";
-  const labelInput = core.getInput("label") || "aiqt:needs-review";
+  const labelInput = core.getInput("label") || "ai-lint:needs-review";
   const maxFindingsInput = core.getInput("max-findings") || "50";
   const workingDirectory = core.getInput("working-directory") || ".";
 
@@ -45,7 +45,7 @@ async function run(): Promise<void> {
   const { context } = github;
   if (!context.payload.pull_request) {
     core.setFailed(
-      "aiqt action only runs on pull_request events. " +
+      "ai-lint action only runs on pull_request events. " +
         "Add 'on: pull_request' to your workflow.",
     );
     return;
@@ -55,15 +55,15 @@ async function run(): Promise<void> {
   const { owner, repo } = context.repo;
 
   // 3. Load config
-  let config: AiqtConfig;
+  let config: AiLintConfig;
   try {
     config =
-      configPath === ".aiqt.yml"
+      configPath === ".ai-lint.yml"
         ? loadConfig()
         : loadConfig(configPath);
   } catch {
     config = { ...DEFAULT_CONFIG };
-    core.warning("Could not load .aiqt.yml config, using defaults");
+    core.warning("Could not load .ai-lint.yml config, using defaults");
   }
 
   // 4. Merge pr-gate config: action inputs take priority over config file
@@ -86,7 +86,7 @@ async function run(): Promise<void> {
     return prGate?.["max-findings"] ?? 50;
   })();
 
-  const label = labelInput || prGate?.label || "aiqt:needs-review";
+  const label = labelInput || prGate?.label || "ai-lint:needs-review";
 
   // 5. Fetch PR diff
   const octokit = github.getOctokit(token);

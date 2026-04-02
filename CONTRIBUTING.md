@@ -1,12 +1,12 @@
-# Contributing to aiqt
+# Contributing to ai-lint
 
 Thanks for your interest in contributing. This guide covers everything you need to get started.
 
 ## Development Setup
 
 ```bash
-git clone https://github.com/bhvbhushan/aiqt.git
-cd aiqt
+git clone https://github.com/bhvbhushan/ai-lint.git
+cd ai-lint
 bun install
 bun run build
 bun test

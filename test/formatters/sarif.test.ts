@@ -64,9 +64,9 @@ describe("formatSarif", () => {
     const parsed = JSON.parse(output);
     const driver = parsed.runs[0].tool.driver;
 
-    expect(driver.name).toBe("aiqt");
+    expect(driver.name).toBe("ai-lint");
     expect(driver.version).toBe("0.1.0");
-    expect(driver.informationUri).toBe("https://github.com/bhvbhushan/aiqt");
+    expect(driver.informationUri).toBe("https://github.com/bhvbhushan/ai-lint");
 
     // Should have two unique rules
     expect(driver.rules).toHaveLength(2);

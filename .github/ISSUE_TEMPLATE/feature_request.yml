@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest a new feature or improvement for aiqt
+description: Suggest a new feature or improvement for ai-lint
 labels: ["enhancement"]
 body:
   - type: textarea
