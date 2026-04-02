@@ -1,10 +1,10 @@
 {
-  "name": "aiqt",
+  "name": "ai-lint",
   "version": "0.1.0",
   "description": "AI code quality toolkit — deterministic linter for the AI coding era",
   "type": "module",
   "bin": {
-    "aiqt": "./dist/cli.js"
+    "ai-lint": "./dist/cli.js"
   },
   "scripts": {
     "build": "bun build src/cli.ts --outdir dist --target node",
@@ -38,13 +38,13 @@
   ],
   "author": "Bhavya Bhushan (https://github.com/bhvbhushan)",
   "license": "MIT",
-  "homepage": "https://github.com/bhvbhushan/aiqt#readme",
+  "homepage": "https://github.com/bhvbhushan/ai-lint#readme",
   "bugs": {
-    "url": "https://github.com/bhvbhushan/aiqt/issues"
+    "url": "https://github.com/bhvbhushan/ai-lint/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bhvbhushan/aiqt.git"
+    "url": "git+https://github.com/bhvbhushan/ai-lint.git"
   },
   "engines": {
     "node": ">=20"
@@ -68,8 +68,8 @@
   "contributes": {
     "problemMatchers": [
       {
-        "name": "aiqt",
-        "owner": "aiqt",
+        "name": "ai-lint",
+        "owner": "ai-lint",
         "fileLocation": ["relative", "${workspaceFolder}"],
         "pattern": {
           "regexp": "^(.+):(\\d+):(\\d+):\\s+(error|warning|info)\\s+(.+)\\s+\\[(.+)\\]$",

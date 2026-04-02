@@ -41,7 +41,7 @@ function buildSummaryMarkdown(result: ScanResult): string {
 
   const lines: string[] = [];
 
-  lines.push("## aiqt Scan Results");
+  lines.push("## ai-lint Scan Results");
   lines.push("");
   lines.push("| Severity | Count |");
   lines.push("|----------|-------|");

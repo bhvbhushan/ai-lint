@@ -1,9 +1,9 @@
-# aiqt
+# ai-lint
 
-[![license](https://img.shields.io/npm/l/aiqt)](https://github.com/bhvbhushan/aiqt/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/ai-lint)](https://github.com/bhvbhushan/ai-lint/blob/main/LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green)](https://nodejs.org/)
-[![CI](https://github.com/bhvbhushan/aiqt/actions/workflows/ci.yml/badge.svg)](https://github.com/bhvbhushan/aiqt/actions/workflows/ci.yml)
+[![CI](https://github.com/bhvbhushan/ai-lint/actions/workflows/ci.yml/badge.svg)](https://github.com/bhvbhushan/ai-lint/actions/workflows/ci.yml)
 
 AI code quality toolkit — deterministic linter for the AI coding era. Catches the bugs that AI agents introduce: god functions, N+1 queries, fire-and-forget DB calls, leftover debug logging, and 18 more patterns. Like `eslint` for structural quality, but focused on the antipatterns AI generates.
 
@@ -13,10 +13,10 @@ Built on [ast-grep](https://ast-grep.github.io/) for fast, tree-sitter-based AST
 
 ```bash
 # npm
-npm install -g aiqt
+npm install -g ai-lint
 
 # bun (recommended)
-bun add -g aiqt
+bun add -g ai-lint
 ```
 
 Requires Node.js >= 20 or Bun >= 1.0.
@@ -25,19 +25,19 @@ Requires Node.js >= 20 or Bun >= 1.0.
 
 ```bash
 # Scan current directory
-aiqt scan .
+ai-lint scan .
 
 # Scan specific directory with JSON output
-aiqt scan src/ --format json
+ai-lint scan src/ --format json
 
 # Check what detectors are available
-aiqt check
+ai-lint check
 
 # CI mode — exit code 1 if errors found
-aiqt scan . --format text
+ai-lint scan . --format text
 
 # Scan with custom config
-aiqt scan . --config .aiqt.yml
+ai-lint scan . --config .ai-lint.yml
 ```
 
 ## Benchmarks
@@ -128,11 +128,11 @@ src/utils/api.ts
 
 ## GitHub Action
 
-Add aiqt as a PR gate that posts inline review comments on changed lines:
+Add ai-lint as a PR gate that posts inline review comments on changed lines:
 
 ```yaml
-# .github/workflows/aiqt.yml
-name: aiqt
+# .github/workflows/ai-lint.yml
+name: ai-lint
 on: [pull_request]
 
 jobs:
@@ -140,7 +140,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: bhvbhushan/aiqt@main
+      - uses: bhvbhushan/ai-lint@main
         with:
           on-failure: comment-only    # or: request-changes, label, auto-close
           severity-threshold: warning
@@ -152,9 +152,9 @@ jobs:
 | Input | Description | Default |
 |-------|-------------|---------|
 | `github-token` | GitHub token for API access | `${{ github.token }}` |
-| `config` | Path to `.aiqt.yml` config file | `.aiqt.yml` |
+| `config` | Path to `.ai-lint.yml` config file | `.ai-lint.yml` |
 | `on-failure` | Action on findings: `comment-only`, `request-changes`, `label`, `auto-close` | `comment-only` |
-| `label` | Label to apply when `on-failure` is `label` | `aiqt:needs-review` |
+| `label` | Label to apply when `on-failure` is `label` | `ai-lint:needs-review` |
 | `max-findings` | Maximum findings to report (0 = unlimited) | `50` |
 | `severity-threshold` | Minimum severity for inline comments (`error`, `warning`, `info`) | `warning` |
 | `working-directory` | Directory to scan (relative to repo root) | `.` |
@@ -171,7 +171,7 @@ jobs:
 
 ## Configuration
 
-Create `.aiqt.yml` in your project root:
+Create `.ai-lint.yml` in your project root:
 
 ```yaml
 rules:
@@ -191,7 +191,7 @@ pr-gate:
   on-failure: request-changes
   severity-threshold: warning
   max-findings: 50
-  label: "aiqt:needs-review"
+  label: "ai-lint:needs-review"
 ```
 
 ## CLI Options
@@ -199,7 +199,7 @@ pr-gate:
 | Flag | Description | Default |
 |------|-------------|---------|
 | `--format` | Output format: `text`, `json`, `html`, `sarif`, `github` | `text` |
-| `--config` | Path to config file | `.aiqt.yml` |
+| `--config` | Path to config file | `.ai-lint.yml` |
 | `--no-config` | Ignore config file | |
 | `--max-findings` | Maximum findings to report | `100` |
 | `--output` | Write report to file | |
@@ -215,9 +215,9 @@ pr-gate:
 ## Architecture
 
 ```
-aiqt CLI (Commander)
+ai-lint CLI (Commander)
 +-- Scan Engine           -- discovers files, loads AST, runs detectors, collects findings
-+-- Config Loader (Zod)   -- validates .aiqt.yml, merges defaults, per-rule config
++-- Config Loader (Zod)   -- validates .ai-lint.yml, merges defaults, per-rule config
 +-- Detectors (22)        -- AST pattern matching via ast-grep (@ast-grep/napi)
 +-- Formatters (5)        -- text, json, csv, html, sarif output
 +-- Project Analyzer      -- parses package.json, requirements.txt, lockfiles
@@ -226,7 +226,7 @@ aiqt CLI (Commander)
 
 ## Versioning
 
-aiqt follows [Semantic Versioning](https://semver.org/):
+ai-lint follows [Semantic Versioning](https://semver.org/):
 
 - **0.x.y** ... pre-1.0, the API may change between minor versions
 - **PATCH** (0.x.Y) ... bug fixes, new detectors, doc updates
@@ -235,7 +235,7 @@ aiqt follows [Semantic Versioning](https://semver.org/):
 
 ## Roadmap
 
-- [x] **Phase 1**: Core scanner with 7 detectors, 5 output formats, `.aiqt.yml` config
+- [x] **Phase 1**: Core scanner with 7 detectors, 5 output formats, `.ai-lint.yml` config
 - [x] **Phase 2**: PR Gate GitHub Action, 15 new detectors (7 → 22), monorepo support, real-world validation
 - [ ] **Phase 3**: Cross-file analysis (duplicate code detection, repeated constants), npm publish
 - [ ] **Phase 4**: LLM-powered deep review mode (separation of concerns, semantic duplication)

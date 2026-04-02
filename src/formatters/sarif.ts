@@ -123,9 +123,9 @@ export function formatSarif(result: ScanResult): string {
       {
         tool: {
           driver: {
-            name: "aiqt",
+            name: "ai-lint",
             version: "0.1.0",
-            informationUri: "https://github.com/bhvbhushan/aiqt",
+            informationUri: "https://github.com/bhvbhushan/ai-lint",
             rules,
           },
         },

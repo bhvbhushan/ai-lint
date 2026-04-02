@@ -6,7 +6,7 @@
 
 Report vulnerabilities through one of these channels:
 
-- **GitHub Private Vulnerability Reporting:** [Submit advisory](https://github.com/bhvbhushan/aiqt/security/advisories/new)
+- **GitHub Private Vulnerability Reporting:** [Submit advisory](https://github.com/bhvbhushan/ai-lint/security/advisories/new)
 - **Email:** bhvbhushan@gmail.com
 
 ## Response SLAs
@@ -27,7 +27,7 @@ Report vulnerabilities through one of these channels:
 
 The following are in scope for security reports:
 
-- `aiqt` npm package
+- `ai-lint` npm package
 - GitHub Action (`action.yml`)
 - GitHub repository (CI/CD, workflows)
 - AST analysis engine
@@ -35,13 +35,13 @@ The following are in scope for security reports:
 
 ## Out of Scope
 
-- Bugs found in projects scanned by aiqt
+- Bugs found in projects scanned by ai-lint
 - Upstream bugs in ast-grep or tree-sitter
 - Feature requests
 
 ## Security Model
 
-aiqt is a **local static analysis tool**. By design it:
+ai-lint is a **local static analysis tool**. By design it:
 
 - Makes no network calls
 - Stores no data beyond the scan output

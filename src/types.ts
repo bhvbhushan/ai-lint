@@ -64,8 +64,8 @@ export interface PrGateConfig {
   "max-findings": number;
 }
 
-/** Top-level aiqt configuration */
-export interface AiqtConfig {
+/** Top-level ai-lint configuration */
+export interface AiLintConfig {
   rules: Record<string, RuleConfig>;
   ignore: string[];
   "pr-gate"?: PrGateConfig;
