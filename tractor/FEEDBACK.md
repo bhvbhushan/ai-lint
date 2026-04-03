@@ -260,7 +260,7 @@ that `check --rules` is the intended way to run batch lint rules.
 
 #### 3. `tractor run` and `tractor check --rules` Use Different Config Formats
 
-**Tracking: [PR #65](https://github.com/boukeversteegh/tractor/pull/65) — design doc for unifying formats**
+**Tracking: [boukeversteegh/tractor#65](https://github.com/boukeversteegh/tractor/pull/65) — design doc for unifying formats**
 
 **Severity: Confusing**
 
@@ -465,7 +465,7 @@ invalid type: sequence, expected struct RulesConfig
 ```
 
 ...which told me to wrap rules in a `rules:` key. The `language` and `expect`
-fields were discovered by analogy with CLI flags (see also issue #4 — `expect-valid`
+fields were discovered by analogy with CLI flags (see also feedback item 4 above — `expect-valid`
 and `expect-invalid` are silently ignored in favor of `expect: [{valid: ...}]`).
 
 **Suggestion**: Add a `--rules` format example to `tractor check --help` or document
@@ -493,7 +493,7 @@ reference of "all element names for language X" would be valuable.
 
 #### 14. No Way to Exclude Files in `check --rules`
 
-**Tracking: Related to [issue #53](https://github.com/boukeversteegh/tractor/issues/53) (changed-files limiting) and [PR #65](https://github.com/boukeversteegh/tractor/pull/65) (format unification which includes `exclude`)**
+**Tracking: Related to [boukeversteegh/tractor#53](https://github.com/boukeversteegh/tractor/issues/53) (changed-files limiting) and [boukeversteegh/tractor#65](https://github.com/boukeversteegh/tractor/pull/65) (format unification which includes `exclude`)**
 
 **Severity: Medium**
 
@@ -569,7 +569,7 @@ repository and should be filed as GitHub issues:
 
 ### 6. Feature: `--exclude` glob for `tractor check`
 - **Labels**: enhancement
-- **Ref**: Feedback #14 above, related to issue #53
+- **Ref**: Feedback #14 above, related to [boukeversteegh/tractor#53](https://github.com/boukeversteegh/tractor/issues/53)
 - **Summary**: `tractor check` has no way to exclude files (test files, generated code, vendor dirs). The `run` config has `exclude:` but `check --rules` doesn't. Add `--exclude` CLI flag or support `exclude:` in the rules YAML.
 
 ### 7. Feature: list available element names per language
