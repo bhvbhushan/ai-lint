@@ -539,17 +539,19 @@ or similar to distinguish "tractor failed" from "tractor found problems".
 
 ## Priority Summary
 
-| Priority | Feature | Rules Unblocked |
-|----------|---------|-----------------|
-| P0 | Fix TSX/JSX parsing | `dangerous-inner-html`, `god-component` |
-| P0 | Document `check --rules` YAML format | All rules (usability) |
-| ~~P1~~ | ~~Line counting function~~ | Works via `--meta` + `substring-before()` — ergonomics issue [#75](https://github.com/boukeversteegh/tractor/issues/75) |
-| ~~P1~~ | ~~File exclude in `check --rules`~~ | Already works — undiscovered due to undocumented format (#12) |
-| P1 | Unify `run` / `check --rules` config | Usability |
-| P2 | Cyclomatic complexity helper or docs | `god-function` (full) |
-| P2 | Node text comparison | `dead-code-path`, `trivial-assertion` |
-| P2 | Per-file aggregation docs | `excessive-any`, `over-mocking` |
-| P3 | Tree node reference docs | All rules (authoring speed) |
+| Priority | Feature | Issue | Rules Unblocked |
+|----------|---------|-------|-----------------|
+| P0 | Fix TSX/JSX parsing | [tractor#67](https://github.com/boukeversteegh/tractor/issues/67) | `dangerous-inner-html`, `god-component` |
+| P0 | Document `check --rules` YAML format | [tractor#69](https://github.com/boukeversteegh/tractor/issues/69) | All rules (usability) |
+| ~~P1~~ | ~~Line counting function~~ | [tractor#75](https://github.com/boukeversteegh/tractor/issues/75) | Works via `--meta` — ergonomics improvement |
+| ~~P1~~ | ~~File exclude in `check --rules`~~ | — | Already works, undiscovered due to undocumented format |
+| P1 | Unify `run` / `check --rules` config | [tractor#65](https://github.com/boukeversteegh/tractor/pull/65) | Usability |
+| P1 | Unknown YAML keys silently ignored | [tractor#68](https://github.com/boukeversteegh/tractor/issues/68) | All rules (correctness) |
+| P1 | Glob path resolution: warn on 0 matches | [tractor#72](https://github.com/boukeversteegh/tractor/issues/72) | Usability |
+| P2 | TS tree: overloaded `<type>`, unclear `<ref/>` | [tractor#73](https://github.com/boukeversteegh/tractor/issues/73) | All rules (authoring speed) |
+| P2 | Node text comparison | — | `dead-code-path`, `trivial-assertion` |
+| P2 | Per-file aggregation docs | — | `excessive-any`, `over-mocking` |
+| P3 | Make `-v schema` more discoverable | [tractor#70](https://github.com/boukeversteegh/tractor/issues/70) | All rules (authoring speed) |
 
 ---
 
