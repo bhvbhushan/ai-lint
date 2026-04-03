@@ -1,0 +1,258 @@
+# VibeCop rules expressed as Tractor XPath queries
+#
+# Usage:
+#   tractor check "src/**/*.ts" --rules poc/tractor-rules.yaml -f gcc
+#   tractor check "src/**/*.ts" --rules poc/tractor-rules.yaml -f json -v "reason,severity,file,line,column,rule_id"
+#   tractor check "src/**/*.ts" --rules poc/tractor-rules.yaml -f github
+#
+# This file replaces ~1,500 lines of hand-coded TypeScript AST detectors
+# with ~200 lines of declarative XPath rules.
+#
+# Legend:
+#   [FULL]    = Rule fully replaces the VibeCop detector
+#   [PARTIAL] = Rule covers the main case but misses edge cases
+#   [JS-ONLY] = JavaScript/TypeScript only (Python needs separate invocation)
+
+rules:
+  # ===========================================================================
+  # QUALITY
+  # ===========================================================================
+
+  # [FULL] debug-console-in-prod: console.log/debug/info/dir/table/trace
+  # Replaces: src/detectors/debug-console-in-prod.ts (88 lines)
+  - id: debug-console-in-prod
+    xpath: >-
+      //call[function/member[
+        object='console'
+      ][
+        property='log' or property='debug' or property='info'
+        or property='dir' or property='table' or property='trace'
+        or property='group' or property='groupEnd'
+      ]]
+    reason: "Debug console statement left in production code. Remove or replace with a structured logger."
+    severity: warning
+    language: typescript
+    expect-valid:
+      - 'console.error("legit error")'
+      - 'console.warn("legit warning")'
+      - 'logger.info("structured")'
+    expect-invalid:
+      - 'console.log("debug")'
+      - 'console.debug("trace")'
+      - 'console.info("verbose")'
+      - 'console.table(data)'
+
+  # [FULL] double-type-assertion: as unknown as X / as any as X
+  # Replaces: src/detectors/double-type-assertion.ts (49 lines, regex-based!)
+  - id: double-type-assertion
+    xpath: "//as_expression[as_expression]"
+    reason: "Double type assertion (as unknown as X) bypasses TypeScript type safety. Fix the underlying type mismatch."
+    severity: warning
+    language: typescript
+    expect-valid:
+      - "const x = value as string"
+    expect-invalid:
+      - "const x = value as unknown as string"
+      - "const x = value as any as number"
+
+  # [FULL] empty-error-handler: completely empty catch blocks
+  # Replaces: src/detectors/empty-error-handler.ts (174 lines) — empty case
+  - id: empty-catch-block
+    xpath: "//catch[count(body/block/*) = 0]"
+    reason: "Empty catch block silently swallows errors. Add error handling, re-throw, or add a comment."
+    severity: warning
+    language: typescript
+    expect-valid:
+      - "try { f() } catch(e) { handleError(e) }"
+    expect-invalid:
+      - "try { f() } catch(e) { }"
+
+  # [PARTIAL] empty-error-handler: catch blocks that only console.log
+  - id: catch-block-log-only
+    xpath: >-
+      //catch[
+        count(body/block/*) = 1
+      ][
+        body/block/call[function/member[object='console']]
+        or body/block/*/call[function/member[object='console']]
+      ]
+    reason: "Catch block only logs the error without handling it. Add proper error recovery."
+    severity: warning
+    language: typescript
+    expect-valid:
+      - "try { f() } catch(e) { handleError(e); return fallback; }"
+    expect-invalid:
+      - "try { f() } catch(e) { console.log(e); }"
+
+  # [FULL] todo-in-production: TODO/FIXME/HACK comments
+  # Replaces: src/detectors/todo-in-production.ts (53 lines)
+  - id: todo-in-production
+    xpath: >-
+      //comment[
+        contains(.,'TODO') or contains(.,'FIXME') or contains(.,'HACK')
+        or contains(.,'XXX') or contains(.,'TEMP')
+      ]
+    reason: "TODO/FIXME comment in production code. Address it or create a tracked issue."
+    severity: warning
+    language: typescript
+    expect-valid:
+      - "// This is a regular comment"
+    expect-invalid:
+      - "// TODO: fix this"
+      - "// FIXME: broken"
+      - "// HACK: workaround"
+
+  # [PARTIAL] god-function: functions with too many parameters (>5)
+  # Covers the parameter-count part of src/detectors/god-function.ts (250+ lines)
+  - id: god-function-params
+    xpath: "//function[count(parameters/params/param) > 5]"
+    reason: "Function has too many parameters (>5). Consider using an options object."
+    severity: warning
+    language: typescript
+    expect-valid:
+      - "function f(a: string, b: number, c: boolean) { }"
+    expect-invalid:
+      - "function f(a: string, b: number, c: boolean, d: object, e: any, f: string, g: number) { }"
+
+  # [PARTIAL] god-function: arrow functions with too many parameters
+  - id: god-lambda-params
+    xpath: "//lambda[count(parameters/params/param) > 5]"
+    reason: "Arrow function has too many parameters (>5). Consider using an options object."
+    severity: warning
+    language: typescript
+    expect-valid:
+      - "const f = (a: string, b: number) => a + b"
+
+  # ===========================================================================
+  # SECURITY
+  # ===========================================================================
+
+  # [FULL] sql-injection: template literal with interpolation in query/execute
+  # Replaces: src/detectors/sql-injection.ts (195 lines) — template case
+  - id: sql-injection-template
+    xpath: >-
+      //call[
+        function/member[
+          property='query' or property='execute' or property='raw'
+          or property='$queryRaw' or property='$queryRawUnsafe'
+          or property='$executeRaw' or property='$executeRawUnsafe'
+          or property='prepare' or property='rawQuery'
+        ]
+      ][arguments//template_substitution]
+    reason: "SQL query uses template literal with interpolation - potential SQL injection. Use parameterized queries."
+    severity: error
+    language: typescript
+    expect-valid:
+      - 'db.query("SELECT * FROM users WHERE id = $1", [id])'
+    expect-invalid:
+      - 'db.query(`SELECT * FROM users WHERE id = ${id}`)'
+
+  # [PARTIAL] sql-injection: string concatenation in query calls
+  - id: sql-injection-concat
+    xpath: >-
+      //call[
+        function/member[
+          property='query' or property='execute' or property='raw'
+          or property='$queryRaw' or property='$executeRaw'
+          or property='prepare' or property='rawQuery'
+        ]
+      ][arguments/arguments/binary]
+    reason: "SQL query built with string concatenation - potential SQL injection. Use parameterized queries."
+    severity: error
+    language: typescript
+    expect-valid:
+      - 'db.query("SELECT * FROM users WHERE id = $1", [id])'
+    expect-invalid:
+      - 'db.query("SELECT * FROM users WHERE id = " + id)'
+
+  # [FULL] insecure-defaults: eval() usage
+  # Part of src/detectors/insecure-defaults.ts (434 lines)
+  - id: eval-usage
+    xpath: "//call[function='eval']"
+    reason: "eval() executes arbitrary code and is a security risk. Use JSON.parse() for data or refactor."
+    severity: error
+    language: typescript
+    expect-valid:
+      - "JSON.parse(data)"
+    expect-invalid:
+      - "eval(userInput)"
+
+  # [FULL] insecure-defaults: new Function()
+  - id: new-function-usage
+    xpath: "//new[contains(.,'new Function')]"
+    reason: "new Function() creates functions from strings - security risk. Use static function definitions."
+    severity: error
+    language: typescript
+    expect-valid:
+      - 'new RegExp(".*")'
+    expect-invalid:
+      - 'new Function("return " + code)'
+
+  # [FULL] insecure-defaults: rejectUnauthorized: false
+  - id: tls-verification-disabled
+    xpath: "//pair[name='rejectUnauthorized'][value/bool='false']"
+    reason: "TLS certificate verification is disabled. Remove rejectUnauthorized: false."
+    severity: error
+    language: typescript
+    expect-valid:
+      - "const opts = { rejectUnauthorized: true }"
+    expect-invalid:
+      - "const opts = { rejectUnauthorized: false }"
+
+  # [FULL] token-in-localstorage: auth tokens in localStorage/sessionStorage
+  # Replaces: src/detectors/token-in-localstorage.ts
+  - id: token-in-localstorage
+    xpath: >-
+      //call[
+        function/member[
+          object='localStorage' or object='sessionStorage'
+        ][property='setItem']
+      ][
+        arguments/arguments/string[
+          contains(.,'token') or contains(.,'jwt') or contains(.,'auth')
+          or contains(.,'session') or contains(.,'secret')
+          or contains(.,'apikey') or contains(.,'credential')
+          or contains(.,'access_token')
+        ]
+      ]
+    reason: "Auth token stored in localStorage/sessionStorage - vulnerable to XSS. Use httpOnly cookies."
+    severity: error
+    language: typescript
+    expect-valid:
+      - 'localStorage.setItem("theme", "dark")'
+      - 'localStorage.setItem("language", "en")'
+    expect-invalid:
+      - 'localStorage.setItem("auth_token", jwt)'
+      - 'sessionStorage.setItem("jwt", token)'
+
+  # ===========================================================================
+  # CORRECTNESS
+  # ===========================================================================
+
+  # [PARTIAL] n-plus-one-query: await inside for-of loop
+  # Part of src/detectors/n-plus-one-query.ts
+  - id: n-plus-one-for-loop
+    xpath: "//for_in_statement[.//await]"
+    reason: "Await inside for-of loop may cause N+1 query. Consider batching with Promise.all or WHERE IN."
+    severity: warning
+    language: typescript
+    expect-valid:
+      - "for (const item of items) { process(item); }"
+    expect-invalid:
+      - "for (const id of ids) { const u = await db.find(id); }"
+
+  # [PARTIAL] n-plus-one-query: .map(async ... await ...)
+  - id: n-plus-one-async-map
+    xpath: >-
+      //call[
+        function/member/property='map'
+      ][
+        arguments//lambda[starts-with(.,'async')][.//await]
+      ]
+    reason: "Async map with await may cause N+1 query. Batch operations or use Promise.all."
+    severity: warning
+    language: typescript
+    expect-valid:
+      - "items.map((item) => item.name)"
+    expect-invalid:
+      - "items.map(async (item) => { await db.create(item); })"
