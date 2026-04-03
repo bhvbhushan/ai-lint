@@ -20,6 +20,7 @@ export interface DetectorMeta {
   severity: Severity;
   category: "correctness" | "quality" | "security" | "testing";
   languages: Lang[];
+  priority?: number;
 }
 
 /** Context passed to each detector for a single file */
