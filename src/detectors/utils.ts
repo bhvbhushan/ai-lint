@@ -1,5 +1,5 @@
 import type { SgNode } from "@ast-grep/napi";
-import type { DetectionContext, Finding } from "../types.js";
+import type { DetectionContext, Finding, Severity } from "../types.js";
 
 /**
  * Create a Finding from an AST node (ast-grep based detectors).
@@ -11,7 +11,7 @@ export function makeFinding(
   ctx: DetectionContext,
   node: SgNode,
   message: string,
-  severity: "error" | "warning" | "info",
+  severity: Severity,
   suggestion?: string,
 ): Finding {
   const range = node.range();
@@ -31,6 +31,7 @@ export function makeFinding(
 /**
  * Create a Finding from explicit line/column values (regex/line-based detectors).
  * Line and column should already be 1-indexed.
+ * Pass endLine/endColumn when range info is available.
  */
 export function makeLineFinding(
   detectorId: string,
@@ -38,8 +39,10 @@ export function makeLineFinding(
   line: number,
   column: number,
   message: string,
-  severity: "error" | "warning" | "info",
+  severity: Severity,
   suggestion?: string,
+  endLine?: number,
+  endColumn?: number,
 ): Finding {
   return {
     detectorId,
@@ -49,5 +52,7 @@ export function makeLineFinding(
     line,
     column,
     ...(suggestion != null && { suggestion }),
+    ...(endLine != null && { endLine }),
+    ...(endColumn != null && { endColumn }),
   };
 }

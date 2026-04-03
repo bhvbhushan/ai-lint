@@ -147,19 +147,17 @@ function buildFinding(
   m: FunctionMetrics,
   severity: "error" | "warning",
 ): Finding {
-  return {
-    ...makeLineFinding(
-      "god-function",
-      ctx,
-      m.startLine,
-      m.startColumn,
-      `Function '${m.name}' is too complex (${m.lines} lines, cyclomatic complexity ${m.complexity}, ${m.params} params)`,
-      severity,
-      "Break this function into smaller, focused functions. Extract helper methods, use early returns, and reduce branching.",
-    ),
-    endLine: m.endLine,
-    endColumn: m.endColumn,
-  };
+  return makeLineFinding(
+    "god-function",
+    ctx,
+    m.startLine,
+    m.startColumn,
+    `Function '${m.name}' is too complex (${m.lines} lines, cyclomatic complexity ${m.complexity}, ${m.params} params)`,
+    severity,
+    "Break this function into smaller, focused functions. Extract helper methods, use early returns, and reduce branching.",
+    m.endLine,
+    m.endColumn,
+  );
 }
 
 function detectJavaScript(ctx: DetectionContext): Finding[] {
