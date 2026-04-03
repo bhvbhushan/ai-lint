@@ -26,6 +26,7 @@ export { dynamicCodeExec } from "./dynamic-code-exec.js";
 export { llmUnpinnedModel } from "./llm-unpinned-model.js";
 export { llmNoSystemMessage } from "./llm-no-system-message.js";
 export { llmTemperatureNotSet } from "./llm-temperature-not-set.js";
+export { hallucinatedPackage } from "./hallucinated-package.js";
 
 import type { Detector } from "../types.js";
 import { emptyErrorHandler } from "./empty-error-handler.js";
@@ -56,6 +57,7 @@ import { dynamicCodeExec } from "./dynamic-code-exec.js";
 import { llmUnpinnedModel } from "./llm-unpinned-model.js";
 import { llmNoSystemMessage } from "./llm-no-system-message.js";
 import { llmTemperatureNotSet } from "./llm-temperature-not-set.js";
+import { hallucinatedPackage } from "./hallucinated-package.js";
 
 /** All built-in detectors */
 export const builtinDetectors: Detector[] = [
@@ -87,4 +89,5 @@ export const builtinDetectors: Detector[] = [
   llmUnpinnedModel,
   llmNoSystemMessage,
   llmTemperatureNotSet,
+  hallucinatedPackage,
 ];
