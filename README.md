@@ -6,7 +6,7 @@
 [![CI](https://github.com/bhvbhushan/vibecop/actions/workflows/ci.yml/badge.svg)](https://github.com/bhvbhushan/vibecop/actions/workflows/ci.yml)
 [![Playground](https://img.shields.io/badge/Try-Playground-orange)](https://vibecop-pg.bhvbhushan7.com/)
 
-AI code quality toolkit — deterministic linter for the AI coding era. 28 detectors catch the bugs AI agents introduce: god functions, N+1 queries, unsafe shell exec, unpinned LLM models, and more. Runs automatically inside Claude Code, Cursor, Codex, Aider, and 3 other AI tools via `vibecop init`.
+AI code quality toolkit — deterministic linter for the AI coding era. 35 detectors catch the bugs AI agents introduce: god functions, N+1 queries, unsafe shell exec, unpinned LLM models, and more. Runs automatically inside Claude Code, Cursor, Codex, Aider, and 7 other AI tools via `vibecop init`. Also available as an MCP server for Continue.dev, Amazon Q, and Zed.
 
 Built on [ast-grep](https://ast-grep.github.io/) for fast, tree-sitter-based AST analysis. No LLM required — every finding is deterministic and reproducible.
 
@@ -123,6 +123,29 @@ src/llm.ts:18:5 warning llm-unpinned-model: Unpinned model alias "gpt-4o". Pin t
 
 See [docs/agent-integration.md](docs/agent-integration.md) for full setup instructions and troubleshooting.
 
+### MCP Server (Tier 3 tools)
+
+For MCP-compatible tools like Continue.dev, Amazon Q, and Zed:
+
+```bash
+vibecop serve
+```
+
+Configure your MCP client:
+
+```json
+{
+  "mcpServers": {
+    "vibecop": {
+      "command": "npx",
+      "args": ["vibecop", "serve"]
+    }
+  }
+}
+```
+
+Three tools available: `vibecop_scan` (scan directory), `vibecop_check` (check file), `vibecop_explain` (detector docs).
+
 ## Benchmarks
 
 ### Vibe-coded vs established: finding density comparison
@@ -178,7 +201,7 @@ src/utils/api.ts
 ✖ 9 problems (3 errors, 5 warnings, 1 info)
 ```
 
-## Detectors (28 total)
+## Detectors (35 total)
 
 ### Quality (16 detectors)
 
@@ -222,12 +245,18 @@ src/utils/api.ts
 | `mixed-concerns` | Mixed Concerns | Files importing both UI frameworks and database/server libraries | warning |
 | `hallucinated-package` | Hallucinated Package | Dependencies not in top-5K npm allowlist (potential AI hallucination) | info |
 
-### Testing (2 detectors)
+### Testing (8 detectors)
 
 | ID | Detector | Description | Severity |
 |----|----------|-------------|----------|
 | `trivial-assertion` | Trivial Assertion | `expect(true).toBe(true)` and similar no-op tests | info |
 | `over-mocking` | Over-Mocking | Test files with excessive mock/spy usage | info |
+| `assertion-roulette` | Assertion Roulette | Tests with too many assertions (default >5) | warning |
+| `sleepy-test` | Sleepy Test | `setTimeout`/`time.sleep` in tests causing flaky CI | warning |
+| `snapshot-only-test` | Snapshot-Only Test | Test files where 100% of assertions are snapshots | info |
+| `empty-test` | Empty Test | Test functions with zero assertions | info |
+| `conditional-test-logic` | Conditional Test Logic | Control flow in tests where assertions may not execute | info |
+| `no-error-path-test` | No Error Path Test | Test files with 3+ tests but no error path testing | info |
 
 ## GitHub Action
 
@@ -297,15 +326,26 @@ pr-gate:
   label: "vibecop:needs-review"
 ```
 
-## CLI Options
+## CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `vibecop scan [path]` | Scan a directory for issues |
+| `vibecop check <file>` | Check a single file |
+| `vibecop init` | Auto-detect AI tools and generate integration configs |
+| `vibecop serve` | Start MCP server (stdio transport) |
+| `vibecop test-rules` | Validate custom YAML rules against inline examples |
+
+## CLI Options (scan/check)
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--format` | Output format: `text`, `json`, `html`, `sarif`, `github`, `agent` | `text` |
+| `--format` | Output format: `text`, `json`, `html`, `sarif`, `github`, `agent`, `gcc` | `text` |
 | `--config` | Path to config file | `.vibecop.yml` |
 | `--no-config` | Ignore config file | |
-| `--max-findings` | Maximum findings to report | `100` |
-| `--output` | Write report to file | |
+| `--max-findings` | Maximum findings to report | `50` |
+| `--diff <ref>` | Scan only files changed vs git ref | |
+| `--verbose` | Show timing summary | |
 
 ## Languages
 
@@ -320,10 +360,12 @@ pr-gate:
 ```
 vibecop CLI (Commander)
 +-- Scan Engine           -- discovers files, loads AST, runs detectors, dedup by priority
++-- MCP Server            -- stdio transport, 3 tools (scan, check, explain)
 +-- Init Wizard           -- auto-detects AI tools, generates hook/rule configs
++-- Custom Rules Engine   -- loads .vibecop/rules/*.yaml, validates with Zod, runs via ast-grep
 +-- Config Loader (Zod)   -- validates .vibecop.yml, merges defaults, per-rule config
-+-- Detectors (28)        -- AST pattern matching via ast-grep (@ast-grep/napi)
-+-- Formatters (6)        -- text, json, html, sarif, github, agent output
++-- Detectors (35)        -- AST pattern matching via ast-grep (@ast-grep/napi)
++-- Formatters (7)        -- text, json, html, sarif, github, agent, gcc output
 +-- Project Analyzer      -- parses package.json, requirements.txt, lockfiles
 +-- GitHub Action          -- diff parser, finding filter, PR review poster
 ```
@@ -342,8 +384,10 @@ vibecop follows [Semantic Versioning](https://semver.org/):
 - [x] **Phase 1**: Core scanner with 7 detectors, 5 output formats, `.vibecop.yml` config
 - [x] **Phase 2**: PR Gate GitHub Action, 15 new detectors (7 → 22), real-world validation
 - [x] **Phase 2.5**: Agent integration (7 tools), 6 LLM/agent detectors (22 → 28), `vibecop init`, `--format agent`
-- [ ] **Phase 3**: MCP server, VS Code extension, cross-file analysis
-- [ ] **Phase 4**: LLM-powered deep review mode (separation of concerns, semantic duplication)
+- [x] **Phase 3**: Test quality detectors (6 new), custom YAML rules, GCC format (28 → 35)
+- [x] **Phase 3.5**: MCP server with scan/check/explain tools, engine API cleanup
+- [ ] **Phase 4**: Context optimization (Read tool interception, AST skeleton caching)
+- [ ] **Phase 5**: VS Code extension, cross-file analysis
 
 ## Contributing
 
