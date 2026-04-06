@@ -10,7 +10,7 @@ export default defineConfig({
         { icon: 'github', label: 'GitHub', href: 'https://github.com/bhvbhushan/vibecop' },
       ],
       editLink: {
-        baseUrl: 'https://github.com/bhvbhushan/vibecop/edit/main/website/',
+        baseUrl: 'https://github.com/bhvbhushan/vibecop/edit/main/product-docs/',
       },
       sidebar: [
         {
