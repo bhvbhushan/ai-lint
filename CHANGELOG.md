@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine API: exported `scan()` and `checkFile()` from `engine.ts` for programmatic use
 - Docs: Tier 3 MCP setup in `docs/agent-integration.md`, Phase 3.5 in `docs/design.md`
 
+### Fixed
+
+- **debug-console-in-prod:** auto-detect CLI/server projects via `package.json` `bin` field and skip — servers legitimately use console.log. Reduced default flagged methods to `log` and `debug` only (was 8 methods). Made configurable via `.vibecop.yml` `methods` array
+- **undeclared-import:** skip packages importing themselves — reads `package.json` `name` field for JS/TS, normalizes hyphens to underscores for Python pyproject.toml matching
+- **placeholder-in-production:** skip fixture, example, sample, mock, demo directories and `.md` files
+
 ### Changed
 
 - Refactored `cli.ts` — scan/check orchestration moved to `engine.ts`, CLI is now a thin layer
