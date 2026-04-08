@@ -1,6 +1,6 @@
 {
   "name": "vibecop",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "AI code quality toolkit — deterministic linter for the AI coding era",
   "type": "module",
   "bin": {
