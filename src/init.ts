@@ -4,14 +4,15 @@ import { join } from "node:path";
 
 /** Resolve the absolute path to dist/context.js from the vibecop package. */
 function resolveContextScript(): string {
-  // When installed via npm: this file is at <pkg>/dist/cli.js or <pkg>/src/init.ts
-  // dist/context.js sits next to dist/cli.js
-  const fromDist = new URL("../dist/context.js", import.meta.url);
-  try {
-    const { existsSync } = require("node:fs") as typeof import("node:fs");
-    if (existsSync(fromDist)) return fromDist.pathname;
-  } catch {}
-  // Fallback: try relative to cwd (local dev)
+  // After bundling: this code runs from dist/cli.js, context.js is a sibling
+  const sibling = new URL("./context.js", import.meta.url);
+  if (existsSync(sibling)) return sibling.pathname;
+
+  // Running from source (dev): dist/context.js relative to src/init.ts
+  const fromSource = new URL("../dist/context.js", import.meta.url);
+  if (existsSync(fromSource)) return fromSource.pathname;
+
+  // Last resort: resolve from cwd (local dev without build)
   const { resolve } = require("node:path") as typeof import("node:path");
   return resolve("dist/context.js");
 }
@@ -402,7 +403,7 @@ export async function runInit(cwd?: string, options?: InitOptions): Promise<void
       return;
     }
 
-    console.log("  Setting up context optimization...");
+    console.log("  Setting up context optimization (beta)...");
     console.log("");
 
     const generated = generateContextHooks(root);
@@ -418,7 +419,8 @@ export async function runInit(cwd?: string, options?: InitOptions): Promise<void
       console.log("");
     }
 
-    console.log("  Context optimization configured.");
+    console.log("  Context optimization configured (beta).");
+    console.log("  Re-run this command after upgrading vibecop or reinstalling deps.");
     console.log("  Run 'vibecop context stats' to see token savings.");
     console.log("");
     return;
